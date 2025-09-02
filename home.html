@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shahriyar Taufik - Visionary Web Developer</title>
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3Cfilter id='neon-glow' x='-50%25' y='-50%25' width='200%25' height='200%25'%3E%3CfeGaussianBlur stdDeviation='4' result='coloredBlur'/%3E%3CfeMerge%3E%3CfeMergeNode in='coloredBlur'/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3Cstyle%3E.st-text { font-family: 'Orbitron', sans-serif; font-size: 65px; font-weight: 700; fill: %2300DCFF; text-anchor: middle; dominant-baseline: central; filter: url(%23neon-glow); }%3C/style%3E%3C/defs%3E%3C!-- Removed rect element for transparent background --%3E%3Ctext x='50' y='55' class='st-text'%3EST%3C/text%3E%3C/svg%3E">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;700&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00DCFF; /* Vibrant Cyan */
+            --secondary-color: #0A2E5B; /* Deep Space Blue */
+            --accent-color: #FF00C1; /* Neon Magenta */
+            --background-color: #010409; /* Near Black */
+            --text-color: #E6EDF3; /* Light Gray */
+            --card-bg-color: #0D1117; /* Darker Gray for cards */
+            --border-color: rgba(0, 220, 255, 0.2); /* Cyan with alpha */
+            --border-hover-color: rgba(0, 220, 255, 0.6);
+            --hero-bg-fallback: linear-gradient(135deg, var(--secondary-color) 0%, var(--background-color) 100%); /* Fallback background */
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+
+        /* Preloader Styles */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column; /* Stack laptop and text */
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.75s ease-out, visibility 0.75s ease-out;
+            visibility: visible;
+            opacity: 1;
+        }
+        #preloader.loaded {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .laptop-loader {
+            width: 100px; 
+            height: 70px;
+            position: relative;
+            margin-bottom: 20px; 
+        }
+        .laptop-screen {
+            width: 100%;
+            height: 55px; 
+            background-color: var(--card-bg-color);
+            border: 2px solid var(--primary-color);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            overflow: hidden; 
+            box-shadow: 0 0 10px rgba(0, 220, 255, 0.3);
+            display: flex; 
+            align-items: flex-start; 
+            justify-content: flex-start; 
+            padding: 6px; 
+        }
+        .laptop-base {
+            width: 120px; 
+            height: 10px;
+            background-color: var(--secondary-color);
+            border: 2px solid var(--primary-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) perspective(10px) rotateX(5deg); 
+        }
+        .coding-text {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 9px; 
+            line-height: 1.3; 
+            color: var(--primary-color);
+            white-space: pre-wrap; /* Respects newlines and spaces, wraps text */
+            /* word-break: break-all; Removed to prevent breaking words mid-way */
+            width: 100%; 
+            height: 100%;
+            overflow: hidden; 
+            display: inline-block; 
+        }
+        .preloader-message {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+            margin-top: 15px;
+            font-size: 1rem;
+            text-shadow: 0 0 5px var(--primary-color);
+            animation: pulse-text 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse-text {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--background-color); }
+        ::-webkit-scrollbar-thumb { background: var(--primary-color); border-radius: 5px; border: 2px solid var(--background-color); }
+        ::-webkit-scrollbar-thumb:hover { background: #00A8C7; }
+
+        #hero-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: -1; pointer-events: none; }
+
+        .section-title { font-family: 'Orbitron', sans-serif; color: var(--primary-color); text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color); position: relative; display: inline-block; padding-bottom: 10px; margin-bottom: 3rem; }
+        .section-title::after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 0; width: 0; height: 3px; background: var(--primary-color); box-shadow: 0 0 8px var(--primary-color); animation: expand-glow-underline 1.5s ease-out forwards; animation-delay: 0.5s; }
+        @keyframes expand-glow-underline { from { width: 0; opacity: 0; } to { width: 80px; opacity: 1; } }
+
+        .card-base { background-color: var(--card-bg-color); border: 1px solid var(--border-color); border-radius: 12px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease, border-color 0.4s ease; overflow: hidden; position: relative; }
+        .card-base:hover { transform: translateY(-12px) scale(1.03); box-shadow: 0 0 25px rgba(0, 220, 255, 0.3), 0 0 40px rgba(0, 220, 255, 0.2); border-color: var(--border-hover-color); }
+        .card-base::before { content: ""; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; background: radial-gradient(circle, rgba(0,220,255,0.15) 0%, rgba(0,220,255,0) 70%); z-index: -1; opacity: 0; transition: opacity 0.4s ease; border-radius: 12px; }
+        .card-base:hover::before { opacity: 1; }
+
+        .future-work-card { border-style: dashed; animation: pulse-border-tech 3s infinite ease-in-out; }
+        .future-work-card:hover { animation-play-state: paused; }
+        @keyframes pulse-border-tech { 0%, 100% { border-color: var(--border-color); box-shadow: 0 0 5px rgba(0, 220, 255, 0.1); } 50% { border-color: var(--primary-color); box-shadow: 0 0 15px rgba(0, 220, 255, 0.3); } }
+
+        html { scroll-behavior: smooth; }
+
+        header { background: rgba(13, 17, 23, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); }
+        nav a { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; letter-spacing: 1px; color: var(--text-color); padding: 8px 10px; border-radius: 6px; transition: color 0.3s ease, background-color 0.3s ease, text-shadow 0.3s ease; position: relative; }
+        nav a::after { content: ''; position: absolute; width: 0; height: 2px; display: block; margin-top: 5px; right: 0; background: var(--primary-color); transition: width 0.3s ease; }
+        nav a:hover::after, nav a.active::after { width: 100%; left: 0; right: auto; }
+        nav a:hover, nav a.active { color: var(--primary-color); text-shadow: 0 0 5px var(--primary-color); }
+
+        .hero-title { font-family: 'Orbitron', sans-serif; font-size: clamp(2.5rem, 6vw, 4.5rem); color: var(--text-color); text-shadow: 0 0 15px var(--primary-color), 0 0 25px var(--primary-color); animation: text-flicker 3s linear infinite alternate, fadeInGlow 2s ease-out; }
+        .hero-subtitle { color: var(--primary-color); font-size: clamp(1.1rem, 2.5vw, 1.6rem); animation: fadeInGlow 2.5s ease-out 0.5s backwards; }
+        .hero-description { animation: fadeInGlow 3s ease-out 1s backwards; }
+        @keyframes text-flicker { 0%, 18%, 22%, 25%, 53%, 57%, 100% { text-shadow: 0 0 10px var(--primary-color), 0 0 15px var(--primary-color), 0 0 20px var(--primary-color), 0 0 30px var(--accent-color), 0 0 40px var(--accent-color); } 20%, 24%, 55% { text-shadow: none; } }
+        @keyframes fadeInGlow { from { opacity: 0; transform: translateY(20px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+
+        .cta-button { font-family: 'Orbitron', sans-serif; background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); padding: 10px 24px; border-radius: 8px; transition: all 0.3s ease; box-shadow: 0 0 10px rgba(0, 220, 255, 0.3); text-shadow: 0 0 5px rgba(0, 220, 255, 0.5); display: inline-block; }
+        .cta-button:hover { background: var(--primary-color); color: var(--background-color); box-shadow: 0 0 20px var(--primary-color), 0 0 30px var(--primary-color); transform: translateY(-3px) scale(1.05); }
+        .cta-button:active { transform: translateY(0px) scale(1); }
+        .secondary-button { font-family: 'Orbitron', sans-serif; border: 2px solid var(--text-color); color: var(--text-color); padding: 10px 24px; border-radius: 8px; transition: all 0.3s ease; display: inline-block; }
+        .secondary-button:hover { border-color: var(--primary-color); color: var(--primary-color); background-color: rgba(0, 220, 255, 0.1); box-shadow: 0 0 15px rgba(0, 220, 255, 0.2); transform: translateY(-3px); }
+
+        section { padding: 80px 0; position: relative; z-index: 1; background-color: var(--background-color); }
+        #hero { min-height: 100vh; background-color: transparent; /* Background handled by canvas or fallback */ }
+
+        /* Enhanced Scroll Animations */
+        .scroll-animated-item {
+            opacity: 0;
+            transform: translateY(50px) scale(0.95); 
+            filter: blur(3px);
+            transition: opacity 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                        filter 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .scroll-animated-item.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1); 
+            filter: blur(0);
+        }
+        .fade-in-section { 
+             opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1; transform: translateY(0);
+        }
+
+
+        .item-image-placeholder { background: linear-gradient(45deg, var(--secondary-color), var(--card-bg-color)); display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 1.5rem; height: 160px; overflow: hidden; }
+        .item-image-placeholder svg { width: 4rem; height: 4rem; color: var(--primary-color); opacity: 0.6; transition: transform 0.3s ease; }
+        .card-base:hover .item-image-placeholder svg { transform: scale(1.1) rotate(5deg); }
+
+        .skill-category { margin-bottom: 2.5rem; }
+        .skill-category-title { font-family: 'Orbitron', sans-serif; color: var(--primary-color); font-size: 1.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+        .skill-item { background-color: var(--card-bg-color); padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid var(--border-color); transition: background-color 0.3s ease, transform 0.3s ease, border-color 0.3s ease; display: flex; align-items: center; gap: 0.75rem; }
+        .skill-item:hover { background-color: var(--secondary-color); transform: translateX(5px); border-color: var(--primary-color); }
+        .skill-item svg { width: 1.25rem; height: 1.25rem; color: var(--primary-color); flex-shrink: 0; }
+
+        .timeline { position: relative; max-width: 900px; margin: 0 auto; }
+        .timeline::after { content: ''; position: absolute; width: 4px; background-color: var(--border-color); top: 0; bottom: 0; left: 50%; margin-left: -2px; border-radius: 2px; animation: draw-line 2s ease-out forwards; }
+        @keyframes draw-line { from { height: 0; } to { height: 100%; } }
+
+        .timeline-item { 
+            padding: 10px 40px; position: relative; background-color: inherit; width: 50%;
+        }
+        .timeline-item:nth-child(odd) { left: 0; }
+        .timeline-item:nth-child(even) { left: 50%; }
+
+        .timeline-item::after { content: ''; position: absolute; width: 20px; height: 20px; right: -10px; background-color: var(--background-color); border: 3px solid var(--primary-color); top: 20px; border-radius: 50%; z-index: 1; box-shadow: 0 0 10px var(--primary-color); transform: scale(0); animation: pop-in 0.5s ease-out forwards; animation-delay: var(--animation-delay-pop-in, 0.5s); }
+        @keyframes pop-in { to { transform: scale(1); } }
+        .timeline-item:nth-child(even)::after { left: -10px; }
+        .timeline-content { padding: 20px; background-color: var(--card-bg-color); position: relative; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
+        .timeline-content h3 { font-family: 'Orbitron', sans-serif; color: var(--primary-color); margin-bottom: 0.5rem; }
+        .timeline-date { font-size: 0.85rem; color: var(--text-color); opacity: 0.7; margin-bottom: 0.75rem; }
+
+        .certification-card { text-align: center; }
+        .certification-card .item-image-placeholder { height: 120px; }
+        .certification-card .item-image-placeholder svg { width: 3rem; height: 3rem; }
+        .certification-card h3 { font-size: 1.3rem; }
+
+        @media (max-width: 768px) {
+            nav ul { display: none; flex-direction: column; width: 100%; background-color: rgba(13, 17, 23, 0.98); backdrop-filter: blur(8px); position: absolute; top: 68px; left: 0; padding: 1rem 0; border-bottom: 1px solid var(--border-color); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+            #menu-toggle { display: block; }
+            #main-nav ul.show-mobile-menu { display: flex; }
+            #main-nav ul li { text-align: center; padding: 0.85rem 0; width: 100%; }
+            nav a::after { display: none; }
+            nav a:hover, nav a.active { background-color: rgba(0,220,255,0.1); }
+
+            .hero-title { font-size: 2rem; } .hero-subtitle { font-size: 1rem; }
+            .section-title { font-size: 2.2rem; margin-bottom: 2rem;}
+            .project-grid, .skills-grid .skill-category ul, .certifications-grid { grid-template-columns: 1fr; } 
+            .skills-grid { grid-template-columns: 1fr; } 
+
+
+            .timeline::after { left: 20px; margin-left: 0;}
+            .timeline-item { width: 100%; padding-left: 50px; padding-right: 10px; margin-bottom:30px;}
+            .timeline-item:nth-child(odd), .timeline-item:nth-child(even) { left: 0; }
+            .timeline-item::after { left: 11px; }
+            .timeline-item:nth-child(even)::after { left: 11px; }
+        }
+
+        .future-work-icon-placeholder { width: 80px; height: 80px; border: 2px dashed var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; transition: transform 0.3s ease, border-color 0.3s ease; }
+        .future-work-icon-placeholder svg { width: 2.5rem; height: 2.5rem; color: var(--primary-color); opacity: 0.7; transition: transform 0.3s ease; }
+        .future-work-card:hover .future-work-icon-placeholder { transform: rotate(15deg) scale(1.1); border-color: var(--accent-color); }
+        .future-work-card:hover .future-work-icon-placeholder svg { transform: scale(1.1); }
+
+        /* Mobile menu button styles */
+        #menu-toggle {
+            display: none; 
+            z-index: 60; 
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="preloader">
+        <div class="laptop-loader">
+            <div class="laptop-screen">
+                <div class="coding-text" id="coding-text-element"></div>
+            </div>
+            <div class="laptop-base"></div>
+        </div>
+        <div class="preloader-message">Initializing Interface...</div>
+    </div>
+
+    <canvas id="hero-canvas"></canvas>
+
+    <header class="fixed top-0 left-0 right-0 z-50">
+        <nav id="main-nav" class="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+            <a href="#hero" class="text-3xl font-bold" style="font-family: 'Orbitron', sans-serif; color: var(--primary-color); text-shadow: 0 0 8px var(--primary-color);">ST</a>
+            <div class="md:hidden">
+                <button id="menu-toggle" aria-label="Toggle menu" aria-expanded="false" class="text-gray-300 hover:text-white focus:outline-none p-2 rounded-md hover:bg-[var(--card-bg-color)]">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                    </svg>
+                </button>
+            </div>
+            <ul class="hidden md:flex space-x-3 lg:space-x-4 items-center">
+                <li><a href="#hero" class="active">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#education">Education</a></li>
+                <li><a href="#certifications">Certs</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="hero" class="min-h-screen flex items-center justify-center relative text-center px-4">
+        <div class="z-10 max-w-3xl">
+            <h1 class="hero-title mb-6">Shahriyar Taufik</h1>
+            <p class="hero-subtitle mb-8">Architect of Digital Realities & Creative Web Developer</p>
+            <p class="hero-description text-lg md:text-xl text-gray-400 mb-12 max-w-xl mx-auto">
+                Transforming complex ideas into elegant, high-performance web experiences. Let's build the future, one line of code at a time.
+            </p>
+            <a href="#projects" class="cta-button text-lg">
+                Explore My Creations
+            </a>
+        </div>
+    </section>
+
+    <section id="about" class="py-20 md:py-24 fade-in-section">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title text-4xl md:text-5xl font-bold text-center scroll-animated-item">About Me</h2>
+            <div class="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-10 md:gap-16">
+                <div class="md:w-2/5 flex justify-center relative group scroll-animated-item" style="transition-delay: 0.2s;">
+                    <div class="w-52 h-52 md:w-60 md:h-60 bg-gradient-to-br from-secondary-color to-indigo-800 rounded-full flex items-center justify-center text-7xl md:text-8xl shadow-2xl border-2 border-primary-color relative overflow-hidden">
+                        <span class="font-orbitron z-10" style="color: var(--primary-color); text-shadow: 0 0 5px var(--primary-color);">ST</span>
+                         <div class="absolute inset-0 opacity-30" id="avatar-lines"></div> </div>
+                </div>
+                <div class="md:w-3/5 text-center md:text-left scroll-animated-item" style="transition-delay: 0.4s;">
+                    <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+                        Greetings! I'm Shahriyar Taufik, a passionate Web Developer specializing in crafting cutting-edge, user-centric digital solutions. My core philosophy revolves around merging innovative technology with intuitive design to create impactful web applications.
+                    </p>
+                    <p class="text-lg text-gray-300 mb-6 leading-relaxed">
+                        With a strong foundation in modern front-end and back-end technologies, I thrive on solving complex problems and pushing the boundaries of what's possible on the web. I am proficient in React, Node.js, Python, and various AI/ML frameworks.
+                    </p>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        Beyond coding, I'm an avid learner, constantly exploring emerging tech landscapes and seeking new challenges that foster growth and innovation. My goal is to not just build websites, but to engineer experiences.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="py-20 md:py-24 fade-in-section">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title text-4xl md:text-5xl font-bold text-center scroll-animated-item">Core Competencies</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 skills-grid">
+                <div class="skill-category scroll-animated-item" style="transition-delay: 0.1s;">
+                    <h3 class="skill-category-title">Frontend Development</h3>
+                    <ul class="space-y-3">
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.2s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10.75 2.75a.75.75 0 00-1.5 0V5.5h-2.25a.75.75 0 000 1.5h2.25V9.75a.75.75 0 001.5 0V6.999h2.25a.75.75 0 000-1.5h-2.25V2.75z" /><path fill-rule="evenodd" d="M2 10a8 8 0 1116 0 8 8 0 01-16 0zm13.36-3.013A6.504 6.504 0 0010 3.5a6.504 6.504 0 00-5.36 3.487 6.504 6.504 0 000 6.026A6.504 6.504 0 0010 16.5a6.504 6.504 0 005.36-3.487 6.504 6.504 0 000-6.026zM10 15a5 5 0 100-10 5 5 0 000 10z" clip-rule="evenodd" /></svg> HTML5, CSS3, TailwindCSS, SASS</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.3s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10 3.75a2 2 0 100 4 2 2 0 000-4zM8.868 9.23a1.5 1.5 0 00-2.736 0L3.53 14.4A1.5 1.5 0 004.898 16.5h10.204a1.5 1.5 0 001.368-2.1l-2.602-5.17a1.5 1.5 0 00-2.736 0L8.867 9.23z" /></svg> JavaScript (ES6+), TypeScript</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.4s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clip-rule="evenodd" /></svg> React, Next.js, Vue.js</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.5s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M7 3.5A1.5 1.5 0 018.5 2h3A1.5 1.5 0 0113 3.5v1A1.5 1.5 0 0111.5 6h-3A1.5 1.5 0 017 4.5v-1z" /><path d="M4.502 7.024A3.499 3.499 0 018 3.5h4a3.5 3.5 0 013.498 3.524l.023.176A3.5 3.5 0 0112 10.5H8a3.5 3.5 0 01-3.523-3.301L4.5 7.024zM3.5 12A1.5 1.5 0 015 10.5h10a1.5 1.5 0 011.5 1.5v1a3.5 3.5 0 01-3.5 3.5H7a3.5 3.5 0 01-3.5-3.5v-1z" /></svg> Responsive Design, Web Accessibility</li>
+                    </ul>
+                </div>
+                <div class="skill-category scroll-animated-item" style="transition-delay: 0.15s;">
+                    <h3 class="skill-category-title">Backend Development</h3>
+                    <ul class="space-y-3">
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.25s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.578A1.5 1.5 0 016.02 8.29l-1.155.577a.5.5 0 00-.312.678l1.013 2.533a.5.5 0 00.763.262l1.24-.62a1.5 1.5 0 011.528 0l1.24.62a.5.5 0 00.763-.262l1.013-2.533a.5.5 0 00-.313-.678l-1.155-.577a1.5 1.5 0 01-.807-1.537l.716-3.578A1.5 1.5 0 0113.852 2H15a1.5 1.5 0 011.5 1.5v1A1.5 1.5 0 0115 6h-.5a1.5 1.5 0 01-1.5-1.5V3.64l-.357 1.785A2.5 2.5 0 0010.587 7.5H9.413A2.5 2.5 0 007.37 5.425L7 3.64V4.5A1.5 1.5 0 015.5 6H5a1.5 1.5 0 01-1.5-1.5v-1zm14 10A1.5 1.5 0 0114.5 12h-1.148a1.5 1.5 0 01-1.465-1.175l-.716-3.578A1.5 1.5 0 0111.98 5.71l1.155-.577a.5.5 0 00.312-.678l-1.013-2.533a.5.5 0 00-.763-.262l-1.24.62a1.5 1.5 0 01-1.528 0l-1.24-.62a.5.5 0 00-.763.262L6.013 4.756a.5.5 0 00.313.678l1.155.577a1.5 1.5 0 01.807 1.537l-.716 3.578A1.5 1.5 0 016.148 12H5a1.5 1.5 0 01-1.5-1.5v-1A1.5 1.5 0 015 8h.5a1.5 1.5 0 011.5 1.5v.86l.357-1.785A2.5 2.5 0 009.413 7H10.587a2.5 2.5 0 002.043 2.575l.357 1.785V9A1.5 1.5 0 0114.5 7.5H15a1.5 1.5 0 011.5 1.5v1zM4.5 15A1.5 1.5 0 016 13.5h1.148a1.5 1.5 0 011.465 1.175l.716 3.578A1.5 1.5 0 018.52 19.79l-1.155.577a.5.5 0 00-.312.678l1.013 2.533a.5.5 0 00.763.262l1.24-.62a1.5 1.5 0 011.528 0l1.24.62a.5.5 0 00.763-.262l1.013-2.533a.5.5 0 00-.313-.678l-1.155-.577a1.5 1.5 0 01-.807-1.537l.716-3.578A1.5 1.5 0 0115.352 13.5H16.5a1.5 1.5 0 010 3h-.5a1.5 1.5 0 01-1.5-1.5v-.86l-.357 1.785A2.5 2.5 0 0012.087 18H10.913a2.5 2.5 0 00-2.043-2.575L8.5 13.64v.86A1.5 1.5 0 017 16h-.5a1.5 1.5 0 01-1.5-1.5z" clip-rule="evenodd" /></svg> Node.js, Express.js</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.35s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" /><path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.18l3.75-7.03A1.65 1.65 0 016.022 1h7.956a1.65 1.65 0 011.608 1.38l3.75 7.03a1.65 1.65 0 010 1.18l-3.75 7.03A1.65 1.65 0 0113.978 19H6.022a1.65 1.65 0 01-1.608-1.38l-3.75-7.03zm1.608 1.38L6.022 18h7.956l3.75-7.03-3.75-7.03H6.022L2.272 11.97z" clip-rule="evenodd" /></svg> Python (Django, Flask)</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.45s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V2.75A.75.75 0 0110 2zM5.203 4.42a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.06L5.203 5.48a.75.75 0 010-1.06zM2 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm3.203 4.52a.75.75 0 010-1.06l1.06-1.061a.75.75 0 011.061 1.06l-1.06 1.06a.75.75 0 01-1.061 0zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18zm4.797-1.52a.75.75 0 01-1.06 0l-1.061-1.06a.75.75 0 111.06-1.06l1.061 1.06a.75.75 0 010 1.06zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zm-3.203-4.52a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.06a.75.75 0 011.061 0zM10 15a5 5 0 110-10 5 5 0 010 10z" /></svg> RESTful APIs, GraphQL</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.55s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2.5A2.25 2.25 0 0110.75 9h-1.5A2.25 2.25 0 017 6.75v-2.5zm6.25.5a.75.75 0 000-1.5h-5.5a.75.75 0 000 1.5h5.5z" clip-rule="evenodd" /><path d="M3 10.25A2.25 2.25 0 015.25 8h9.5A2.25 2.25 0 0117 10.25v3.5A2.25 2.25 0 0114.75 16h-9.5A2.25 2.25 0 013 13.75v-3.5zM5.25 9.5a.75.75 0 00-.75.75v3.5c0 .414.336.75.75.75h9.5a.75.75 0 00.75-.75v-3.5a.75.75 0 00-.75-.75h-9.5z" /></svg> MongoDB, PostgreSQL, MySQL</li>
+                    </ul>
+                </div>
+                <div class="skill-category scroll-animated-item" style="transition-delay: 0.2s;">
+                    <h3 class="skill-category-title">AI & Machine Learning</h3>
+                    <ul class="space-y-3">
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.3s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M15.903 8.994a3.469 3.469 0 01-4.906 0 3.469 3.469 0 010-4.906 3.469 3.469 0 014.906 0l-.28.28a3.001 3.001 0 00-4.347 0 3.001 3.001 0 000 4.347c1.192 1.191 3.154 1.191 4.347 0l.28.279z" /><path d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8 6.5a6.5 6.5 0 100-13 6.5 6.5 0 000 13z" /><path d="M10.25 7.25a.75.75 0 00-1.5 0v2.69L7.124 8.314a.75.75 0 10-.948 1.152l2.376 1.946a.75.75 0 00.948 0l2.376-1.946a.75.75 0 00-.948-1.152L10.25 9.939V7.25z" /></svg> TensorFlow, PyTorch, Scikit-learn</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.4s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M15.312 11.424c.18-.462.311-.94.399-1.431L18.5 7.5l-2.207-1.742a6.012 6.012 0 00-2.015-1.163L13.5 2.5h-7L5.722 4.595a6.012 6.012 0 00-2.015 1.163L1.5 7.5l2.789 2.493c.088.49.219.97.399 1.43L1.5 12.5l2.207 1.742a6.012 6.012 0 002.015 1.163L6.5 17.5h7l.778-2.095a6.012 6.012 0 002.015-1.163L18.5 12.5l-3.188-1.076zm-3.342.39a4.5 4.5 0 11-5.94-5.94 4.5 4.5 0 015.94 5.94z" clip-rule="evenodd" /></svg> Natural Language Processing (NLP)</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.5s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" /><path fill-rule="evenodd" d="M2 4.75A2.75 2.75 0 014.75 2h10.5A2.75 2.75 0 0118 4.75v10.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25V4.75zm7-1.25a.75.75 0 01.75.75v2h.75a.75.75 0 010 1.5h-1.5a.75.75 0 01-.75-.75v-2.75a.75.75 0 01.75-.75zM7.25 9a.75.75 0 000 1.5h5.5a.75.75 0 000-1.5h-5.5zM9 12.25a.75.75 0 01.75-.75h2.75a.75.75 0 010 1.5H9.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg> Computer Vision (OpenCV)</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.6s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM3.813 7.63a6.486 6.486 0 015.433-4.126.75.75 0 01.504 1.442 4.986 4.986 0 00-4.102 3.14.75.75 0 01-1.835-.456zM6.5 10a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0zM16.187 12.37a6.486 6.486 0 01-5.433 4.126.75.75 0 01-.504-1.442 4.986 4.986 0 004.102-3.14.75.75 0 111.835.456z" /></svg> Data Analysis & Visualization</li>
+                    </ul>
+                </div>
+                <div class="skill-category scroll-animated-item" style="transition-delay: 0.25s;">
+                    <h3 class="skill-category-title">UI/UX Design</h3>
+                    <ul class="space-y-3">
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.35s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M5.5 3A2.5 2.5 0 003 5.5v2.752l-.61-.533a.75.75 0 00-1.015 1.1L3.5 10.5l-2.126 1.68a.75.75 0 001.015 1.1L3 12.748V15.5A2.5 2.5 0 005.5 18h9a2.5 2.5 0 002.5-2.5v-2.752l.61.533a.75.75 0 101.015-1.1L17.5 10.5l2.126-1.68a.75.75 0 10-1.015-1.1l-.61.533V5.5A2.5 2.5 0 0014.5 3h-9zM4.5 5.5A1 1 0 015.5 4.5h9A1 1 0 0115.5 5.5v9a1 1 0 01-1 1h-9a1 1 0 01-1-1v-9z" clip-rule="evenodd" /><path d="M7.504 7.008a.75.75 0 01.992 0l1.75 1.5a.75.75 0 010 1.008l-1.75 1.502a.75.75 0 01-.992-1.016L8.492 10l-.988-.818a.75.75 0 010-1.008L7.504 7.008zM12.5 10a.75.75 0 01-.75-.75V8.508a.75.75 0 011.5 0V9.25a.75.75 0 01-.75.75z" /></svg> Figma, Adobe XD</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.45s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V2.75A.75.75 0 0110 2zM5.203 4.42a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.06L5.203 5.48a.75.75 0 010-1.06zM2 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm3.203 4.52a.75.75 0 010-1.06l1.06-1.061a.75.75 0 011.061 1.06l-1.06 1.06a.75.75 0 01-1.061 0zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18zm4.797-1.52a.75.75 0 01-1.06 0l-1.061-1.06a.75.75 0 111.06-1.06l1.061 1.06a.75.75 0 010 1.06zM18 10a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0118 10zm-3.203-4.52a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.06a.75.75 0 011.061 0zM10 15a5 5 0 110-10 5 5 0 010 10z" /></svg> User Research, Prototyping</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.55s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 2c-4.418 0-8 3.582-8 8s3.582 8 8 8 8-3.582 8-8-3.582-8-8-8zM8.04 4.727a.75.75 0 00-1.08.02L4.733 7.243a.75.75 0 000 1.038L6.96 10.5l-2.227 2.22a.75.75 0 101.06 1.06L8 11.56l2.227 2.226a.75.75 0 101.06-1.06L9.06 10.5l2.227-2.22a.75.75 0 00-1.06-1.06L8 8.44 5.773 6.213a.75.75 0 00-1.06-1.06L8.04 4.727zm4.46.02a.75.75 0 011.06 0l3.327 3.326a.75.75 0 010 1.06l-3.327 3.327a.75.75 0 01-1.06-1.061L13.939 10l-1.46-1.46a.75.75 0 010-1.06l2.98-2.98z" clip-rule="evenodd" /></svg> Wireframing, Usability Testing</li>
+                    </ul>
+                </div>
+                 <div class="skill-category scroll-animated-item" style="transition-delay: 0.3s;">
+                    <h3 class="skill-category-title">Data Structures & Algorithms</h3>
+                    <ul class="space-y-3">
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.4s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M14.5 2.5c0-.966-.784-1.75-1.75-1.75h-5.5c-.966 0-1.75.784-1.75 1.75v1.25H4v1.5h1.75A2.25 2.25 0 018 7.5v1.25H6.25v1.5H8V11.5A2.25 2.25 0 015.75 13.75H4v1.5h1.75c.966 0 1.75.784 1.75 1.75h5.5c.966 0 1.75-.784 1.75-1.75V13.75H16v-1.5h-1.75A2.25 2.25 0 0112 10.25V9H13.75v-1.5H12V6.25A2.25 2.25 0 0114.25 4H16V2.5h-1.5zM8 3.75h4V2.5H8v1.25zM8 17.5v-1.25h4V17.5H8zM12 7.5H8v1.25h4V7.5zm0 3.75H8v1.25h4V11.25z" clip-rule="evenodd" /></svg> Problem Solving</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.5s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M3.505 2.374A4.494 4.494 0 017.999 1a4.494 4.494 0 014.494 1.374A4.494 4.494 0 0118 6.498v7.004a4.494 4.494 0 01-1.374 4.494A4.494 4.494 0 0112.001 19a4.494 4.494 0 01-4.494-1.374A4.494 4.494 0 012 13.502V6.498A4.494 4.494 0 013.505 2.374zM10 6a4 4 0 100 8 4 4 0 000-8z" /><path d="M10 7.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z" /></svg> Algorithm Design & Analysis</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.6s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M2 6.75C2 5.784 2.784 5 3.75 5h12.5c.966 0 1.75.784 1.75 1.75v6.5A1.75 1.75 0 0116.25 15H3.75A1.75 1.75 0 012 13.25v-6.5zm1.75-.25a.25.25 0 00-.25.25v6.5c0 .138.112.25.25.25h12.5a.25.25 0 00.25-.25v-6.5a.25.25 0 00-.25-.25H3.75z" /></svg> Common Data Structures (Arrays, Trees, Graphs)</li>
+                    </ul>
+                </div>
+                 <div class="skill-category scroll-animated-item" style="transition-delay: 0.35s;">
+                    <h3 class="skill-category-title">Tools & Platforms</h3>
+                    <ul class="space-y-3">
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.45s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10.012 2.004a1.5 1.5 0 011.41 0l6.25 3.124A1.5 1.5 0 0118.5 6.628v6.744a1.5 1.5 0 01-.828 1.376l-6.25 3.124a1.5 1.5 0 01-1.41 0l-6.25-3.124A1.5 1.5 0 011.5 13.372V6.628a1.5 1.5 0 01.828-1.376l6.25-3.124zM9.25 7.519L5.38 9.45a.75.75 0 10.64 1.342L10 8.882l4.02 1.958a.75.75 0 10.64-1.342L10.75 7.52v-3.37a.75.75 0 00-1.5 0v3.37z" clip-rule="evenodd" /></svg> Git, GitHub, GitLab</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.55s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M10 2a.75.75 0 01.682.433l3.25 6.502H18a.75.75 0 01.75.75 1.5 1.5 0 01-1.5 1.5H3.75A1.5 1.5 0 012.25 10a.75.75 0 01.75-.75h4.318l3.25-6.502A.75.75 0 0110 2zM9.125 12.75a.75.75 0 000 1.5h1.75a.75.75 0 000-1.5h-1.75zM8.375 15.75a.75.75 0 01.75-.75h1.75a.75.75 0 010 1.5h-1.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg> Docker, Kubernetes</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.65s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M3.5 2.75a.75.75 0 00-1.5 0v14.5a.75.75 0 001.5 0v-1.329a.75.75 0 00-.438-.693A10.973 10.973 0 013 15c0-6.075 4.925-11 11-11a.75.75 0 000-1.5A12.5 12.5 0 003.5 14.018V2.75z" /><path d="M10.25 6a.75.75 0 00-1.5 0v8a.75.75 0 001.5 0v-8zM6.75 8a.75.75 0 00-1.5 0v4a.75.75 0 001.5 0v-4zM13.25 5a.75.75 0 00-1.5 0v10a.75.75 0 001.5 0V5z" /></svg> AWS, Google Cloud, Azure</li>
+                        <li class="skill-item scroll-animated-item" style="transition-delay: 0.75s;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M2 5.75C2 4.784 2.784 4 3.75 4h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0116.25 16H3.75A1.75 1.75 0 012 14.25V5.75zM3.5 5.5a.25.25 0 00-.25.25v8.5c0 .138.112.25.25.25h12.5a.25.25 0 00.25-.25v-8.5a.25.25 0 00-.25-.25H3.5zM7.502 9.017a.75.75 0 01.996 0l1.75 1.498a.75.75 0 010 1.008l-1.75 1.498a.75.75 0 01-.996-1.008L8.494 11l-1.004-.833a.75.75 0 01.012-1.15z" clip-rule="evenodd" /></svg> VS Code, IntelliJ, Agile/Scrum</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="py-20 md:py-24 fade-in-section">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title text-4xl md:text-5xl font-bold text-center scroll-animated-item">Featured Projects</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 project-grid">
+                <div class="project-card card-base p-6 md:p-8 flex flex-col scroll-animated-item" style="transition-delay: 0.1s;">
+                    <div class="item-image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 7.5h6M9 10.5h6M9 13.5h4.5m-4.5 3h4.5" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-orbitron font-semibold mb-3" style="color: var(--primary-color);">KIIT FEST IoT Portal</h3>
+                    <p class="text-gray-400 mb-5 text-sm leading-relaxed flex-grow">
+                        Engineered a dynamic portal for KIIT FEST's IoT division. Featured real-time event tracking and participant registration. The website successfully managed live participation from 17 teams, offering real-time quizzes and instant feedback to keep the competition exciting.
+                    </p>
+                    <div class="mt-auto">
+                        <a href="https://github.com/SHAHRIYARTAUFIK/kiitfest8.0_IOT_BAKEOFF" target="_blank" rel="noopener noreferrer" class="cta-button text-sm w-full text-center block">Probe Details</a>
+                    </div>
+                </div>
+                <div class="project-card card-base p-6 md:p-8 flex flex-col scroll-animated-item" style="transition-delay: 0.2s;">
+                     <div class="item-image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-orbitron font-semibold mb-3" style="color: var(--primary-color);">Alpha Codes Template Suite</h3>
+                    <p class="text-gray-400 mb-5 text-sm leading-relaxed flex-grow">
+                        Architected a suite of high-performance, responsive website templates for Alpha Codes. Emphasized modular design, modern aesthetics, and developer-friendly customization.
+                    </p>
+                     <div class="mt-auto">
+                        <a href="https://github.com/SHAHRIYARTAUFIK/website-templates" target="_blank" rel="noopener noreferrer" class="cta-button text-sm w-full text-center block ">Access Blueprints</a>
+                    </div>
+                </div>
+                <div class="future-work-card card-base p-6 md:p-8 flex flex-col items-center justify-center text-center min-h-[350px] md:min-h-[400px] scroll-animated-item" style="transition-delay: 0.3s;">
+                    <div class="future-work-icon-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-orbitron font-semibold mb-2 text-gray-300">Project Singularity</h3>
+                    <p class="text-gray-500 text-sm">Next-gen concept under development. Preparing for system initialization.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="experience" class="py-20 md:py-24 fade-in-section">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title text-4xl md:text-5xl font-bold text-center scroll-animated-item">Career Trajectory</h2>
+            <div class="timeline">
+                <div class="timeline-item scroll-animated-item">
+                    <div class="timeline-content card-base">
+                        <h3>Front-End Web Developer</h3>
+                        <p class="timeline-date">Jan 2025 - Feb 2025 | IoT Bakeoff - (KIIT FEST 8.0) </p>
+                        <p class="text-gray-400 text-sm">Led a team of developers in creating an website for an interactive platform that enabled live quiz sessions. The website successfully managed live participation from 17 teams, offering real-time quizzes and instant feedback to keep the competition exciting.</p>
+                    </div>
+                </div>
+                 <div class="timeline-item scroll-animated-item">
+                    <div class="timeline-content card-base">
+                        <h3>Full Stack Developer </h3>
+                        <p class="timeline-date">April 2025 - present | Alpha Codes Inc.</p>
+                        <p class="text-gray-400 text-sm">Contributed to both frontend and backend development of scalable web platforms. Worked extensively with React, Node.js for creating templates for e-commerce websites</p>
+                    </div>
+                </div>
+                </div>
+        </div>
+    </section>
+
+    <section id="education" class="py-20 md:py-24 fade-in-section">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title text-4xl md:text-5xl font-bold text-center scroll-animated-item">Academic Background</h2>
+            <div class="timeline">
+                <div class="timeline-item scroll-animated-item">
+                    <div class="timeline-content card-base">
+                        <h3>Higher Secondary (PCMCs)</h3>
+                        <p class="timeline-date">2021 - 2023 | Pathfinder Higher Secondary Public School</p>
+                        <p class="text-gray-400 text-sm">Completed 11th and 12th education in Physics, Chemistry, Mathematics, Computer Science. Introduction with C begins here.</p>
+                    </div>
+                </div>
+                <div class="timeline-item scroll-animated-item">
+                    <div class="timeline-content card-base">
+                        <h3>B.Tech in Electronics & Computer Science Engineering</h3>
+                        <p class="timeline-date">2023 - present | Kalinga Institute of Industrial Technology</p>
+                        <p class="text-gray-400 text-sm">Currently pursuing a B.Tech at KIIT, Bhubaneswar. Enriched academic journey with hands-on projects and practical experience in various technology domains.</p>
+                    </div>
+                </div>
+                <div class="timeline-item scroll-animated-item">
+                    <div class="timeline-content card-base">
+                        <h3>AI & Machine Learning Training</h3>
+                        <p class="timeline-date">Dec 2023 - Apr 2024 | PreGrad</p>
+                        <p class="text-gray-400 text-sm">Acquired proficiency in AI & ML concepts through training, culminating in the development of a House Price Prediction Model. Gained practical experience in building ML models.</p>
+                    </div>
+                </div>
+                </div>
+        </div>
+    </section>
+
+    <section id="certifications" class="py-20 md:py-24 fade-in-section">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title text-4xl md:text-5xl font-bold text-center scroll-animated-item">Validated Expertise</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 certifications-grid">
+                <div class="certification-card card-base p-6 scroll-animated-item" style="transition-delay: 0.1s;">
+                    <div class="item-image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H3M19.5 8.25h-1.5M12 2.25V21M12 2.25c-2.485 0-4.5 2.015-4.5 4.5S9.515 11.25 12 11.25s4.5-2.015 4.5-4.5S14.485 2.25 12 2.25zM12 21c2.485 0 4.5-2.015 4.5-4.5S14.485 12 12 12s-4.5 2.015-4.5 4.5S9.515 21 12 21z" /></svg>
+                    </div>
+                    <h3 class="font-orbitron font-semibold mb-2 mt-4" style="color: var(--primary-color);">AI & Machine Learning Pro</h3>
+                    <p class="text-gray-400 text-sm">Certified by PreGrad</p>
+                </div>
+                <div class="certification-card card-base p-6 scroll-animated-item" style="transition-delay: 0.2s;">
+                    <div class="item-image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" /></svg>
+                    </div>
+                    <h3 class="font-orbitron font-semibold mb-2 mt-4" style="color: var(--primary-color);">Full Stack Web Developer</h3>
+                    <p class="text-gray-400 text-sm">CodeMasters Academy</p>
+                </div>
+                <div class="certification-card card-base p-6 scroll-animated-item" style="transition-delay: 0.3s;">
+                     <div class="item-image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245M9.53 16.122a3 3 0 00 4.28 4.28M9.53 16.122l-.002-.001M12 3c-1.885 0-3.495.885-4.612 2.25M12 3v5.963M12 3c1.885 0 3.495.885 4.612 2.25m0-2.25a3.375 3.375 0 00-3.375-3.375M12 8.963c-1.885 0-3.495-.885-4.612-2.25M12 8.963c1.885 0 3.495-.885 4.612-2.25m0 2.25a3.375 3.375 0 003.375 3.375M12 15c1.885 0 3.495-.885 4.612-2.25M12 15c-1.885 0-3.495-.885-4.612-2.25m0 2.25a3.375 3.375 0 00-3.375 3.375m0 0a2.25 2.25 0 002.25 2.25" /></svg>
+                    </div>
+                    <h3 class="font-orbitron font-semibold mb-2 mt-4" style="color: var(--primary-color);">Certified UI Designer</h3>
+                    <p class="text-gray-400 text-sm">Design Thinking Institute</p>
+                </div>
+                <div class="certification-card card-base p-6 scroll-animated-item" style="transition-delay: 0.4s;">
+                    <div class="item-image-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.218-.266.218-.674 0-.94l-2.496-3.03M11.42 15.17L9.373 16.5a3.003 3.003 0 01-4.243 0l-.001-.001c-1.172-1.172-1.172-3.071 0-4.243l2.047-2.047M11.42 15.17l2.165-2.165M11.42 15.17L6.75 21m6.75-15H5.25A2.25 2.25 0 003 8.25v7.5A2.25 2.25 0 005.25 18h13.5A2.25 2.25 0 0021 15.75v-7.5A2.25 2.25 0 0018.75 6H12m0 0h.01M12 6V3.75M12 6H9.75M12 6H6.75" /></svg>
+                    </div>
+                    <h3 class="font-orbitron font-semibold mb-2 mt-4" style="color: var(--primary-color);">Advanced Web Design</h3>
+                    <p class="text-gray-400 text-sm">Creative Guild Academy</p>
+                </div>
+                <div class="certification-card card-base p-6 scroll-animated-item" style="transition-delay: 0.5s;">
+                    <div class="item-image-placeholder">
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 7.5L3 11.25l3.75 3.75M17.25 7.5L21 11.25l-3.75 3.75M12 2.25v19.5M2.25 12h19.5" /></svg>
+                    </div>
+                    <h3 class="font-orbitron font-semibold mb-2 mt-4" style="color: var(--primary-color);">DSA Expert (Competitive)</h3>
+                    <p class="text-gray-400 text-sm">KIIT University</p>
+                </div>
+                <div class="certification-card card-base p-6 hidden lg:flex flex-col items-center justify-center text-center scroll-animated-item" style="transition-delay: 0.6s;">
+                    <div class="future-work-icon-placeholder">
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-orbitron font-semibold mb-2 text-gray-300">Future Credential</h3>
+                    <p class="text-gray-500 text-sm">Awaiting next achievement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-20 md:py-24 bg-opacity-50 fade-in-section">
+        <div class="container mx-auto px-6">
+            <h2 class="section-title text-4xl md:text-5xl font-bold text-center scroll-animated-item">Initiate Contact</h2>
+            <div class="max-w-xl mx-auto text-center">
+                <p class="text-lg text-gray-300 mb-10 scroll-animated-item" style="transition-delay: 0.2s;">
+                    Have a visionary project, a complex challenge, or an opportunity to redefine digital boundaries? My console is open. Let's connect and materialize innovation.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-6 scroll-animated-item" style="transition-delay: 0.4s;">
+                    <a href="mailto:shahriyartaufik111@gmail.com" class="cta-button text-md w-full sm:w-auto">
+                        Transmit Email
+                    </a>
+                    <a href="https://www.linkedin.com/in/shahriyar-taufik-19662b287/" target="_blank" rel="noopener noreferrer" class="secondary-button text-md w-full sm:w-auto">
+                        LinkedIn Datastream
+                    </a>
+                </div>
+                <div class="mt-12 flex justify-center space-x-6 scroll-animated-item" style="transition-delay: 0.6s;">
+                    <a href="https://github.com/SHAHRIYARTAUFIK" target="_blank" rel="noopener noreferrer" aria-label="GitHub Profile" class="text-gray-400 hover:text-primary-color transition-colors duration-300 transform hover:scale-110">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.074 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.026 2.747-1.026.546 1.379.201 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12.017C22 6.484 17.522 2 12 2Z" clip-rule="evenodd" /></svg>
+                    </a>
+                    </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-10 text-center border-t border-[var(--border-color)] bg-[var(--background-color)] relative z-10">
+        <p class="text-gray-500 text-sm">© <span id="currentYear"></span> Shahriyar Taufik. All Systems Nominal.
+            <br class="sm:hidden"> Built with <span style="color: var(--primary-color); text-shadow: 0 0 3px var(--primary-color);">&lt;/&gt;</span> and a quantum of imagination.
+        </p>
+    </footer>
+
+    <script>
+        // --- Preloader Logic ---
+        const preloader = document.getElementById('preloader');
+        const codingTextElement = document.getElementById('coding-text-element');
+        // The sentence to be typed out on the laptop screen.
+        const targetSentence = "If (code === art) {\n  I'm Picasso.\n}"; // Using \n for a new line
+        let charIndex = 0; // Current character index for typing
+        let typingTimeout; // To store the timeout ID for typing
+        // Original speed: 100ms. 1.5 times faster: 100 / 1.5 = 66.66...
+        const typingSpeed = 68; // Milliseconds per character. (Rounded from 66.66)
+
+        let pageLoadFinished = false; // Flag to check if window.onload has fired
+        let typingAnimationFinished = false; // Flag to check if typing animation has completed
+
+        /**
+         * Types the targetSentence character by character into the codingTextElement.
+         */
+        function typeSentenceOnScreen() {
+            clearTimeout(typingTimeout); // Clear any existing timeout
+            if (codingTextElement && charIndex < targetSentence.length) {
+                // Append the next character to the text content
+                codingTextElement.textContent += targetSentence.charAt(charIndex);
+                charIndex++;
+                // Set timeout for the next character
+                typingTimeout = setTimeout(typeSentenceOnScreen, typingSpeed);
+            } else {
+                // Typing animation is finished
+                typingAnimationFinished = true;
+                // Attempt to hide the preloader if the page has also loaded
+                maybeHidePreloader();
+            }
+        }
+
+        /**
+         * Hides the preloader if both typing animation and page load are complete.
+         */
+        function maybeHidePreloader() {
+            // Check if both conditions are met and preloader exists
+            if (typingAnimationFinished && pageLoadFinished && preloader) {
+                // Check if preloader hasn't been loaded already to prevent multiple calls
+                if (!preloader.classList.contains('loaded')) {
+                    preloader.classList.add('loaded'); // Add class to trigger fade-out
+                    // Remove preloader from DOM after the opacity transition (0.75s)
+                    setTimeout(() => { if (preloader) preloader.remove(); }, 800); // Slightly more than transition
+                }
+            }
+        }
+
+        // Start typing animation for preloader immediately if elements are found
+        if (preloader && codingTextElement) {
+            codingTextElement.textContent = ""; // Ensure the text element is empty before starting
+            typeSentenceOnScreen(); // Start the typing animation
+        } else {
+            // Log a warning if preloader elements are not found
+            console.warn("Preloader elements not found for custom typing animation.");
+            // If preloader exists but text element doesn't, hide preloader to prevent blocking the page.
+            if(preloader) {
+                preloader.style.opacity = '0';
+                preloader.style.visibility = 'hidden';
+                setTimeout(() => { if (preloader) preloader.remove(); }, 800);
+            }
+            // Assume page and animation are "finished" to not block the flow if critical elements are missing.
+            pageLoadFinished = true;
+            typingAnimationFinished = true;
+        }
+
+
+        // --- Three.js Background Animation ---
+        let scene, camera, renderer, stars; // Declare Three.js variables
+
+        /**
+         * Initializes the Three.js scene, camera, renderer, and starfield.
+         */
+        function initThreeJS() {
+            const canvas = document.getElementById('hero-canvas');
+            if (!canvas) {
+                console.error("Hero canvas not found for Three.js. Applying fallback background.");
+                applyFallbackBackground(); // Apply a CSS fallback if canvas is missing
+                return;
+            }
+
+            try {
+                // Create scene
+                scene = new THREE.Scene();
+                // Create camera
+                camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+                camera.position.z = 1; // Position camera slightly back
+
+                // Create renderer
+                renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio); // Adjust for device pixel ratio for sharper rendering
+                renderer.setClearColor(0x000000, 0); // Transparent background for the canvas
+
+                // Create starfield
+                const starGeometry = new THREE.BufferGeometry();
+                const starMaterial = new THREE.PointsMaterial({
+                    color: 0x00DCFF, // Star color (using primary color variable)
+                    size: 1.0,       // Star size
+                    transparent: true,
+                    opacity: 0.8,
+                    blending: THREE.AdditiveBlending, // Nice glow effect for stars
+                    sizeAttenuation: true // Stars further away appear smaller
+                });
+
+                const starVertices = [];
+                const starCount = 300000; // Number of stars
+                for (let i = 0; i < starCount; i++) {
+                    // Randomly position stars in a large cube
+                    const x = (Math.random() - 0.5) * 2500;
+                    const y = (Math.random() - 0.5) * 2500;
+                    const z = (Math.random() - 1.5) * 1500; // Start some stars further back for depth
+                    starVertices.push(x, y, z);
+                }
+                starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+                stars = new THREE.Points(starGeometry, starMaterial);
+                scene.add(stars);
+
+                // Add subtle ambient light to the scene
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.75); // Soft white light
+                scene.add(ambientLight);
+
+                // Event listeners for window resize and mouse movement
+                window.addEventListener('resize', onWindowResize, false);
+                document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+                animateThreeJS(); // Start the animation loop
+            } catch (error) {
+                 console.error("Three.js initialization failed:", error);
+                 applyFallbackBackground(); // Apply fallback if Three.js fails
+            }
+        }
+
+        /**
+         * Applies a fallback CSS background if Three.js fails or canvas is not found.
+         */
+        function applyFallbackBackground() {
+            const heroCanvas = document.getElementById('hero-canvas');
+            if(heroCanvas) heroCanvas.style.display = 'none'; // Hide the canvas
+            const heroSection = document.getElementById('hero');
+            // Apply a gradient background defined in CSS variables
+            if(heroSection) heroSection.style.background = 'var(--hero-bg-fallback)';
+        }
+
+        /**
+         * Handles window resize events to update camera aspect ratio and renderer size.
+         */
+        function onWindowResize() {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        }
+
+        // Variables for mouse tracking and camera movement
+        let mouseX = 0, mouseY = 0;
+        let targetX = 0, targetY = 0;
+        const windowHalfX = window.innerWidth / 2;
+        const windowHalfY = window.innerHeight / 2;
+
+        /**
+         * Handles mouse move events to update mouseX and mouseY for camera parallax effect.
+         * @param {MouseEvent} event - The mouse move event.
+         */
+        function onDocumentMouseMove(event) {
+            // Calculate mouse position in normalized device coordinates (-1 to +1)
+            mouseX = (event.clientX - windowHalfX) / windowHalfX;
+            mouseY = (event.clientY - windowHalfY) / windowHalfY;
+        }
+
+        /**
+         * The main animation loop for Three.js.
+         * Moves stars and rotates the camera based on mouse position.
+         */
+        function animateThreeJS() {
+            requestAnimationFrame(animateThreeJS); // Request the next frame
+
+            if (stars) {
+                // Animate stars moving towards the camera
+                stars.position.z += 0.5; // Adjust speed of star movement
+                // Reset star position when they go too far to create a continuous effect
+                if (stars.position.z > 550000) {
+                    stars.position.z = -10000;
+                }
+            }
+
+            if (camera && scene && renderer) {
+                 // Smoothly interpolate camera rotation towards the target mouse position for a parallax effect
+                targetX = mouseX * 0.2; // Sensitivity of camera movement to mouse X
+                targetY = mouseY * 0.2; // Sensitivity of camera movement to mouse Y
+
+                // Ease camera rotation towards target
+                camera.rotation.y += (targetX - camera.rotation.y) * 0.09; // Easing factor for Y rotation
+                camera.rotation.x += (targetY - camera.rotation.x) * 0.09; // Easing factor for X rotation
+
+                // Clamp camera rotation to prevent extreme angles
+                camera.rotation.x = Math.max(-Math.PI / 12, Math.min(Math.PI / 12, camera.rotation.x));
+                camera.rotation.y = Math.max(-Math.PI / 12, Math.min(Math.PI / 12, camera.rotation.y));
+
+                renderer.render(scene, camera); // Render the scene
+            }
+        }
+
+        // --- Smooth Scrolling & Active Nav Link Logic ---
+        document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault(); // Prevent default anchor click behavior
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+
+                if (targetElement) {
+                    // Calculate position considering fixed header height
+                    const headerOffset = document.querySelector('header')?.offsetHeight || 70;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    // Scroll smoothly to the target element
+                    window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+                }
+
+                // Update active class on navigation links
+                document.querySelectorAll('nav a').forEach(link => link.classList.remove('active'));
+                this.classList.add('active');
+
+                // Close mobile menu if open after clicking a link
+                const navUl = document.querySelector('#main-nav ul');
+                if (navUl?.classList.contains('show-mobile-menu')) {
+                    navUl.classList.remove('show-mobile-menu');
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        });
+
+        // --- Scroll Animations for sections and items & Active Nav Update on Scroll ---
+        const sections = document.querySelectorAll('section[id]'); // Get all sections with an ID
+        const navLinks = document.querySelectorAll('nav a'); // Get all navigation links
+        const headerHeight = document.querySelector('header')?.offsetHeight || 70; // Get header height for offset
+
+        // Intersection Observer options for scroll animations
+        const observerOptions = {
+            root: null, // Observe in relation to the viewport
+            rootMargin: '0px 0px -15% 0px', // Trigger when 15% from bottom of element enters viewport
+            threshold: 0.1 // At least 10% of the element is visible
+        };
+
+        /**
+         * Callback function for the Intersection Observer.
+         * Adds 'is-visible' class to animate elements when they enter the viewport.
+         * @param {IntersectionObserverEntry[]} entries - Array of observed entries.
+         * @param {IntersectionObserver} observer - The Intersection Observer instance.
+         */
+        const observerCallback = (entries, observer) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible'); // Make the element visible
+
+                    // Stagger animations for child items within a 'fade-in-section'
+                    if (entry.target.classList.contains('fade-in-section')) {
+                        const animatedChildren = entry.target.querySelectorAll('.scroll-animated-item');
+                        animatedChildren.forEach((child, childIndex) => {
+                            if (!child.classList.contains('is-visible')) {
+                                child.style.transitionDelay = `${childIndex * 0.1}s`; // Apply staggered delay
+                                child.classList.add('is-visible');
+                            }
+                        });
+                    } else if (entry.target.classList.contains('scroll-animated-item')) {
+                        // If it's a standalone animated item, ensure it becomes visible
+                        entry.target.classList.add('is-visible');
+                    }
+
+                    // Handle timeline item dot animation delay specifically
+                    if (entry.target.classList.contains('timeline-item')) {
+                         const timelineItems = Array.from(entry.target.parentNode.children).filter(el => el.classList.contains('timeline-item'));
+                         const itemIndex = timelineItems.indexOf(entry.target);
+                         // Set a CSS variable for animation delay, used in the @keyframes pop-in
+                         entry.target.style.setProperty('--animation-delay-pop-in', `${itemIndex * 0.15 + 0.5}s`);
+                    }
+                    // Optional: Unobserve after first animation to save resources
+                    // observer.unobserve(entry.target);
+                }
+                // Optional: Reset animation if element scrolls out of view (can be performance intensive)
+                // else { entry.target.classList.remove('is-visible'); }
+            });
+        };
+
+        const scrollObserver = new IntersectionObserver(observerCallback, observerOptions);
+        // Observe all elements with 'fade-in-section' or 'scroll-animated-item' classes
+        document.querySelectorAll('.fade-in-section, .scroll-animated-item').forEach(el => {
+            // Avoid observing children if parent section is already observed for the main fade-in
+            if (!el.closest('.fade-in-section') || el.classList.contains('fade-in-section')) {
+                 scrollObserver.observe(el);
+            }
+        });
+
+        /**
+         * Updates the active navigation link based on the current scroll position.
+         */
+        window.addEventListener('scroll', () => {
+            let currentSectionId = 'hero'; // Default to hero section
+            const scrollPosition = window.pageYOffset + headerHeight + 50; // Current scroll position with offset
+
+            sections.forEach(section => {
+                // Check if the section is currently in view
+                if (section.offsetTop <= scrollPosition && (section.offsetTop + section.offsetHeight) > scrollPosition) {
+                    currentSectionId = section.getAttribute('id');
+                }
+            });
+
+            // Special case for highlighting 'contact' when near the bottom of the page
+            if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 50) {
+                currentSectionId = 'contact';
+            }
+
+            // Update active class on navigation links
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                const linkHref = link.getAttribute('href');
+                if (linkHref === `#${currentSectionId}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // --- Mobile Menu Toggle Logic ---
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainNavUl = document.querySelector('#main-nav ul');
+
+        if (menuToggle && mainNavUl) {
+            menuToggle.addEventListener('click', (e) => {
+                 e.stopPropagation(); // Prevent click from bubbling up to document listener
+                 mainNavUl.classList.toggle('show-mobile-menu');
+                 // Toggle ARIA expanded state for accessibility
+                 const isExpanded = mainNavUl.classList.contains('show-mobile-menu');
+                 menuToggle.setAttribute('aria-expanded', isExpanded.toString());
+            });
+            // Close menu when clicking outside of it (on mobile)
+            document.addEventListener('click', (e) => {
+                if (mainNavUl.classList.contains('show-mobile-menu') && !mainNavUl.contains(e.target) && e.target !== menuToggle) {
+                    mainNavUl.classList.remove('show-mobile-menu');
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        } else {
+            console.warn("Mobile menu toggle button or navigation list not found.");
+        }
+
+
+        // --- Current Year in Footer ---
+        const currentYearElement = document.getElementById('currentYear');
+        if (currentYearElement) {
+            currentYearElement.textContent = new Date().getFullYear();
+        }
+
+        // --- Initialize on window load ---
+        window.onload = function() {
+            pageLoadFinished = true; // Mark page load as finished
+            // Attempt to hide preloader if typing animation has also finished.
+            maybeHidePreloader();
+
+            // Initialize Three.js background
+            initThreeJS();
+
+            // Trigger scroll event once on load to check initial positions for animations and active nav link
+            window.dispatchEvent(new Event('scroll'));
+
+            // Set initial active nav link based on URL hash or default to #hero
+            const initialHash = window.location.hash || '#hero';
+            document.querySelectorAll('nav a').forEach(link => link.classList.remove('active')); // Clear all first
+            const activeLink = document.querySelector(`nav a[href="${initialHash}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            } else {
+                 // Fallback to hero link if hash is invalid or not found
+                 const heroLink = document.querySelector('nav a[href="#hero"]');
+                 if (heroLink) heroLink.classList.add('active');
+            }
+        };
+    </script>
+
+</body>
+</html>
